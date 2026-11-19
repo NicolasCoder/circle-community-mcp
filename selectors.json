@@ -1,0 +1,29 @@
+{
+  "selectors": {
+    "target_url": "https://login.circle.so/",
+    "logged_in_indicator": "[data-testid*=\"user\"], [data-testid*=\"avatar\"], [class*=\"avatar\"], a[href*=\"/c/\"], [data-testid*=\"sidebar\"], .ProseMirror",
+    "logged_out_indicator": "input[type=\"password\"], form[action*=\"sign_in\"], a[href*=\"sign_in\"]",
+    "sidebar_spaces": "a[href*=\"/c/\"], a[href*=\"/chat\"], a[href*=\"/messages\"], nav a, aside a, [data-testid*=\"space\"] a",
+    "new_post_trigger": "[data-testid*=\"new-post\"], [data-testid*=\"create-post\"], button:has-text(\"New post\"), button:has-text(\"Novo post\"), button:has-text(\"Criar post\"), button:has-text(\"Start a post\"), button:has-text(\"Write a post\"), [placeholder*=\"Start a post\"], [placeholder*=\"Escreva\"]",
+    "post_title_input": "[data-testid*=\"post-title\"], input[placeholder*=\"Title\"], textarea[placeholder*=\"Title\"], input[placeholder*=\"Título\"], textarea[placeholder*=\"Título\"], [contenteditable=\"true\"][data-placeholder*=\"Title\"], [contenteditable=\"true\"][data-placeholder*=\"Título\"]",
+    "post_body_editor": ".ProseMirror[contenteditable=\"true\"], [data-testid*=\"post-body\"] [contenteditable=\"true\"], [role=\"textbox\"][contenteditable=\"true\"], textarea",
+    "post_publish_btn": "[data-testid*=\"publish\"], [data-testid*=\"submit-post\"], button:has-text(\"Publish\"), button:has-text(\"Publicar\"), button:has-text(\"Post\"), button:has-text(\"Postar\"), button[type=\"submit\"]",
+    "chat_input_editor": "[data-testid*=\"chat-input\"] [contenteditable=\"true\"], [data-testid*=\"message-input\"] [contenteditable=\"true\"], .ProseMirror[contenteditable=\"true\"], [role=\"textbox\"][contenteditable=\"true\"], textarea[placeholder*=\"message\"], textarea[placeholder*=\"mensagem\"]",
+    "chat_send_btn": "[data-testid*=\"send-message\"], [data-testid*=\"chat-send\"], button[aria-label*=\"Send\"], button[aria-label*=\"Enviar\"], button[type=\"submit\"]",
+    "comment_editor": ".ProseMirror[contenteditable=\"true\"], [placeholder*=\"Write a comment\"], [placeholder*=\"Escreva um comentário\"], [placeholder*=\"Add a comment\"], textarea",
+    "comment_submit_btn": "button:has-text(\"Post comment\"), button:has-text(\"Comment\"), button:has-text(\"Comentar\"), button:has-text(\"Enviar\"), button:has-text(\"Reply\"), button:has-text(\"Responder\")",
+    "file_input": "input[type=\"file\"]"
+  },
+  "api_endpoints": {
+    "sniffer_keywords": [
+      "internal_api",
+      "/api/v1/",
+      "/spaces",
+      "/posts",
+      "/chat",
+      "/messages",
+      "/comments",
+      "graphql"
+    ]
+  }
+}

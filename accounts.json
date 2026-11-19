@@ -1,0 +1,16 @@
+{
+  "active_account": "conta_1",
+  "auto_rotate": false,
+  "accounts": {
+    "conta_1": {
+      "id": "conta_1",
+      "label": "Conta Principal Circle",
+      "profile_dir": "C:\\circle-mcp-profile",
+      "email": "",
+      "display_name": "",
+      "community_origin": "https://engenheiros-de-video.circle.so",
+      "logged_in": false,
+      "last_checked_at": ""
+    }
+  }
+}

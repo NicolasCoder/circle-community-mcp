@@ -1,0 +1,38 @@
+{
+  "preset_id": "engenheiros_de_video_origami_cat_studio_v1",
+  "name": "Padrão Oficial de Capa — Gatinhos Origami Engenheiros de Vídeo (Tactile 3D Studio Desk)",
+  "approved_by": "Nicolas Rezende (2026-11-18)",
+  "generator": {
+    "mcp_server": "flow-studio",
+    "tool": "flow_generate",
+    "tipo": "imagem",
+    "modelo": "2.1",
+    "proporcao": "16:9",
+    "quantidade": "x1",
+    "mandatory_ingredients": [
+      "./assets/community_cat_logo_360.png",
+      "./assets/reference_cat_cover_style.png"
+    ]
+  },
+  "visual_dna": {
+    "characters": "The 3 signature geometric origami / low-poly faceted mascot cats of 'Engenheiros de Vídeo' (1: grumpy charcoal-gray dark-striped cat, 2: bright vibrant-orange cat with '> . <' eyes, 3: happy cream-and-orange cat with '^ o ^' smiling eyes), rendered as tactile matte 3D designer vinyl/origami figures.",
+    "environment": "Clean minimalist video-engineering studio desk in warm cream / editorial linen (#EFECE6 to #FAF8F4), with subtle engineering props (dark cutting mat grid, technical blueprint sketches, precision tools) in soft depth-of-field bokeh.",
+    "color_palette": {
+      "canvas_bg": "#EFECE6",
+      "desk_surface": "#F5F2EB",
+      "hardware_primary": "#1C1C1F",
+      "accent_orange": "#FF5A1F",
+      "copper_detail": "#D97742",
+      "charcoal_cat": "#3A3A3C",
+      "cream_cat": "#FAF6EE"
+    },
+    "lighting": "Warm editorial softbox studio key light, subtle ambient occlusion shadows on the desk, warm orange LED/copper glow inside the tech hardware, zero harsh neon or dark cyberpunk clutter, zero deformed AI text."
+  },
+  "prompt_template": "A charismatic 16:9 editorial illustration and tactile 3D studio scene featuring the cute geometric origami-style orange, cream-and-orange, and charcoal-gray mascot cats from the reference image, standing proudly on a warm cream minimalist engineering desk (#EFECE6 background, dark cutting mat grid and blueprint on the sides) and interacting triumphantly with {HERO_OBJECT_DESCRIPTION} in matte-black (#1C1C1F) and vibrant-orange (#FF5A1F) accents. Clean warm editorial studio lighting, ultra-crisp tactile low-poly designer figure aesthetic matching the reference image, playful modern video-engineering community cover art, no text or watermarks.",
+  "example_hero_objects": {
+    "raea_gpu": "a GIANT monumental matte-black and vibrant-orange (#FF5A1F) NVIDIA RTX GPU graphics card with glowing fans and copper heatpipes, with the charcoal cat resting one paw proudly on the GPU",
+    "brolls_film": "a giant matte-black and vibrant-orange (#FF5A1F) cinema camera lens and glowing timeline film reel strip",
+    "ai_arena": "a giant matte-black and vibrant-orange (#FF5A1F) mechanical benchmark scoreboard podium with glowing status bars",
+    "audio_studio": "a giant matte-black and vibrant-orange (#FF5A1F) broadcast studio condenser microphone and acoustic waveform visualizer"
+  }
+}

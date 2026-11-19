@@ -1,0 +1,17 @@
+{
+  "service_name": "circle-community",
+  "prefix": "circle",
+  "target_url": "https://app.circle.so",
+  "chrome_port": 9363,
+  "daemon_port": 9364,
+  "modo_invisivel": true,
+  "visibility_mode": "offscreen",
+  "mute_audio": true,
+  "multi_login": true,
+  "quota_reader": true,
+  "enable_tray": true,
+  "enable_dashboard": true,
+  "auto_healing": true,
+  "processos_simultaneos": 1,
+  "timeout_processamento_seg": 600
+}

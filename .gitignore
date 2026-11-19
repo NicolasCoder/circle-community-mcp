@@ -1,0 +1,39 @@
+# Byte-compiled / cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Sessões de navegador, cookies, tokens e bancos SQLite locais (NUNCA COMMITAR!)
+*.db
+*.db-journal
+*.db-wal
+*.sqlite
+*.sqlite3
+*profile*/
+circle-mcp-profile/
+.login_completed
+Cookies*
+Local State
+Session*
+
+# Variáveis de ambiente e segredos locais
+.env
+.env.local
+*.pem
+*.key
+credentials*.json
+accounts.local.json
+
+# Diagnósticos, screenshots e outputs locais
+diagnostics/
+outputs/
+*.log
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
