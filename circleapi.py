@@ -1095,6 +1095,13 @@ async def _upload_attachment_active_storage(page, attachment_path: str) -> Optio
     md5_b64 = base64.b64encode(hashlib.md5(raw_bytes).digest()).decode("ascii")
     b64_data = base64.b64encode(raw_bytes).decode("ascii")
     mime_type = mimetypes.guess_type(str(p))[0] or "image/jpeg"
+    img_w, img_h = 1376, 768
+    try:
+        from PIL import Image
+        with Image.open(p) as im:
+            img_w, img_h = im.size
+    except Exception:
+        pass
 
     res = await page.evaluate(
         """async (args) => {
@@ -1148,7 +1155,11 @@ async def _upload_attachment_active_storage(page, attachment_path: str) -> Optio
         }""",
         [p.name, len(raw_bytes), md5_b64, mime_type, b64_data],
     )
-    return res if isinstance(res, dict) and res.get("ok") else None
+    if isinstance(res, dict) and res.get("ok"):
+        res["width"] = img_w
+        res["height"] = img_h
+        return res
+    return None
 
 
 async def criar_post_space(
@@ -1161,7 +1172,8 @@ async def criar_post_space(
     """
     Cria e publica uma nova postagem em um Space da comunidade do Circle.so:
       - Camada 1: Faz upload da imagem/anexo via ActiveStorage DirectUpload (`signed_id`) se `attachment_path`
-        for informado e dispara `POST /internal_api/spaces/<space_id>/posts` com payload TipTap + CSRF token.
+        for informado e dispara `POST /internal_api/spaces/<space_id>/posts` com payload TipTap + CSRF token
+        (suporta tanto Spaces `basic` quanto Spaces `image` via `gallery_attributes`).
       - Camada 2 (Fallback): Automação via interface ProseMirror do Circle.
     """
     params = await obter_parametros_pagina(page)
@@ -1173,10 +1185,12 @@ async def criar_post_space(
         uploaded_blob = await _upload_attachment_active_storage(page, attachment_path)
 
     signed_id = (uploaded_blob or {}).get("signed_id", "")
+    img_w = int((uploaded_blob or {}).get("width") or 1376)
+    img_h = int((uploaded_blob or {}).get("height") or 768)
 
     api_create = await page.evaluate(
         """async (args) => {
-            const [targetSpace, postTitle, postBody, imgSignedId] = args;
+            const [targetSpace, postTitle, postBody, imgSignedId, imgWidth, imgHeight] = args;
             const origin = window.location.origin;
             const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
             const headers = {
@@ -1195,8 +1209,9 @@ async def criar_post_space(
             );
             if (!spaceInfo) return { ok: false, reason: 'space_not_found' };
 
+            const isImageSpace = spaceInfo.post_type === 'image';
             const contentNodes = [];
-            if (imgSignedId) {
+            if (imgSignedId && !isImageSpace) {
                 contentNodes.push({
                     type: 'image',
                     attrs: {
@@ -1209,6 +1224,18 @@ async def criar_post_space(
                         content_type: null,
                         use_intrinsic_size: false
                     }
+                });
+            }
+
+            if (isImageSpace && postTitle && !postBody.trim().startsWith(postTitle.trim())) {
+                contentNodes.push({
+                    type: 'paragraph',
+                    content: [{
+                        type: 'text',
+                        text: postTitle.trim(),
+                        circle_ios_fallback_text: postTitle.trim(),
+                        marks: [{ type: 'bold' }]
+                    }]
                 });
             }
 
@@ -1303,6 +1330,18 @@ async def criar_post_space(
                     }
                 }
             };
+            if (isImageSpace && imgSignedId) {
+                payload.post.gallery_attributes = {
+                    downloadable_images: true,
+                    images_attributes: [
+                        {
+                            image: imgSignedId,
+                            width: imgWidth || 1376,
+                            height: imgHeight || 768
+                        }
+                    ]
+                };
+            }
 
             try {
                 // Se já existe um post recente com o mesmo título neste Space, atualiza in-place via PUT para não duplicar!
@@ -1334,7 +1373,7 @@ async def criar_post_space(
                 return { ok: false, error: String(e) };
             }
         }""",
-        [space_url_or_slug, title, body, signed_id],
+        [space_url_or_slug, title, body, signed_id, img_w, img_h],
     )
     if isinstance(api_create, dict) and api_create.get("ok"):
         created = api_create.get("created") or {}
@@ -1355,6 +1394,7 @@ async def criar_post_space(
             "image_signed_id": signed_id,
             "title": title,
         }
+    return {"ok": False, "action": "create_post", **(api_create if isinstance(api_create, dict) else {"error": str(api_create)})}
 
 
 async def editar_post_space(
