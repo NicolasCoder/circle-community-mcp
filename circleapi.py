@@ -1318,8 +1318,9 @@ async def criar_post_space(
 
             const payload = {
                 post: {
-                    name: postTitle,
+                    name: isImageSpace ? undefined : postTitle,
                     space_id: spaceInfo.id,
+                    topics: [],
                     is_comments_enabled: true,
                     is_liking_enabled: true,
                     tiptap_body: {
@@ -1332,7 +1333,6 @@ async def criar_post_space(
             };
             if (isImageSpace && imgSignedId) {
                 payload.post.gallery_attributes = {
-                    downloadable_images: true,
                     images_attributes: [
                         {
                             image: imgSignedId,
@@ -1345,17 +1345,29 @@ async def criar_post_space(
 
             try {
                 // Se já existe um post recente com o mesmo título neste Space, atualiza in-place via PUT para não duplicar!
-                let existingPostId = null;
+                let existingPost = null;
                 try {
                     const recentResp = await (await fetch(`/internal_api/spaces/${spaceInfo.id}/posts?page=1`, { credentials: 'include', headers })).json();
-                    const found = (recentResp.records || []).find(p => (p.name || '').trim() === postTitle.trim());
-                    if (found) existingPostId = found.id;
+                    const titlePrefix = postTitle.trim().slice(0, 45).toLowerCase();
+                    const slugPrefix = postTitle.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 35);
+                    existingPost = (recentResp.records || []).find(p => {
+                        const cand = (p.name || p.display_title || p.truncated_content || '').trim().toLowerCase();
+                        const pSlug = (p.slug || '').trim().toLowerCase();
+                        return cand === postTitle.trim().toLowerCase() || (titlePrefix.length >= 15 && cand.startsWith(titlePrefix)) || (slugPrefix.length >= 15 && pSlug.startsWith(slugPrefix));
+                    });
                 } catch (e) {}
 
-                const method = existingPostId ? 'PUT' : 'POST';
-                const endpointUrl = existingPostId
-                    ? `/internal_api/spaces/${spaceInfo.id}/posts/${existingPostId}`
-                    : `/internal_api/spaces/${spaceInfo.id}/posts`;
+                if (existingPost && isImageSpace && existingPost.gallery && Array.isArray(existingPost.gallery.images) && existingPost.gallery.images.length > 0) {
+                    // Se o post de imagem já possui a imagem na galeria, não reenvia gallery_attributes sem id para não duplicar a foto no carrossel
+                    delete payload.post.gallery_attributes;
+                }
+
+                const method = existingPost ? 'PUT' : 'POST';
+                const endpointUrl = existingPost
+                    ? `/internal_api/spaces/${spaceInfo.id}/posts/${existingPost.slug || existingPost.id}`
+                    : (isImageSpace
+                        ? `/internal_api/spaces/${spaceInfo.id}/images/posts`
+                        : `/internal_api/spaces/${spaceInfo.id}/posts`);
 
                 const resp = await fetch(endpointUrl, {
                     method,
@@ -1365,7 +1377,7 @@ async def criar_post_space(
                 });
                 if (resp.ok) {
                     const created = await resp.json();
-                    return { ok: true, method: existingPostId ? 'internal_api_put_updated' : 'internal_api_post', origin, space: spaceInfo, created };
+                    return { ok: true, method: existingPost ? 'internal_api_put_updated' : 'internal_api_post', origin, space: spaceInfo, created };
                 }
                 const errTxt = await resp.text();
                 return { ok: false, status: resp.status, error_body: errTxt.slice(0, 500) };
@@ -1522,8 +1534,9 @@ async def editar_post_space(
                 };
             }
 
+            const isImageSpace = spaceInfo.post_type === 'image';
             const contentNodes = [];
-            if (finalSignedId) {
+            if (finalSignedId && !isImageSpace) {
                 contentNodes.push({
                     type: 'image',
                     attrs: {
@@ -1539,12 +1552,38 @@ async def editar_post_space(
                 });
             }
 
-            const paragraphs = newBody.split(/\\n+/).filter(Boolean).map(p => buildParagraphNodes(p));
-            contentNodes.push(...paragraphs);
+            if (isImageSpace && finalTitle && !newBody.trim().startsWith(finalTitle.trim())) {
+                contentNodes.push({
+                    type: 'paragraph',
+                    content: [{
+                        type: 'text',
+                        text: finalTitle.trim(),
+                        circle_ios_fallback_text: finalTitle.trim(),
+                        marks: [{ type: 'bold' }]
+                    }]
+                });
+            }
+
+            const blockParts = newBody.split(/(```[\\s\\S]*?```)/g).filter(Boolean);
+            for (const bp of blockParts) {
+                if (bp.startsWith('```') && bp.endsWith('```')) {
+                    const inner = bp.replace(/^```[a-zA-Z0-9_-]*\\n?/, '').replace(/\\n?```$/, '').trim();
+                    if (inner) {
+                        contentNodes.push({
+                            type: 'codeBlock',
+                            attrs: { language: null },
+                            content: [{ type: 'text', text: inner, circle_ios_fallback_text: inner }]
+                        });
+                    }
+                } else {
+                    const paragraphs = bp.split(/\\n+/).map(s => s.trim()).filter(Boolean).map(p => buildParagraphNodes(p));
+                    contentNodes.push(...paragraphs);
+                }
+            }
 
             const payload = {
                 post: {
-                    name: finalTitle,
+                    name: isImageSpace ? undefined : finalTitle,
                     space_id: spaceInfo.id,
                     is_comments_enabled: true,
                     is_liking_enabled: true,
